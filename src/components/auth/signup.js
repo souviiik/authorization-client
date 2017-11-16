@@ -1,18 +1,14 @@
 import React, { Component } from 'react';
 import { Field, reduxForm } from 'redux-form';
-import { connect } from 'react-redux';
 import * as actions from '../../actions';
 
-class Signin extends Component {
+class Signup extends Component {
     renderField(field){
         const { meta } = field;
         const className = `form-group ${meta.touched && meta.error ? 'has-danger': ''}`;
         return (
             <div className={className}>                
                 <label htmlFor={field.id}>{field.label}</label>
-                <small className="form-text text-muted text-danger">
-                {meta.touched ? meta.error: ''}
-                </small>
                 <input
                     type={field.type}
                     className="form-control" 
@@ -20,23 +16,13 @@ class Signin extends Component {
                     placeholder={field.label}
                     {...field.input}
                 />
+                <small className="form-text text-muted text-danger">{meta.touched ? meta.error: ''}</small>
             </div>
         );
     }
 
-    handleFormSubmit({ email, password }) {
-        // console.log(this.props);
-        this.props.signinUser({ email, password });
-    }
-
-    renderError(){
-        if(this.props.errorMessage) {
-            return (
-                <div className="alert alert-danger">
-                    <strong>Oops!</strong> {this.props.errorMessage}
-                </div>
-            );
-        }
+    onSubmit(values){
+        //console.log(values);
     }
 
     render(){
@@ -45,24 +31,30 @@ class Signin extends Component {
         return(
             <div className="row">
                 <div className="col-md-6 col-md-push-3">
-                    <form onSubmit={handleSubmit(this.handleFormSubmit.bind(this))}>
-                        <h2 className="form-signin-heading">Please sign in</h2>
+                    <form onSubmit={handleSubmit(this.onSubmit.bind(this))}>
+                        <h2 className="form-signin-heading">Please sign up</h2>
                         <Field 
                             name="email" 
                             component={this.renderField}
                             label="Email"
-                            id="signinEmail"
+                            id="signupEmail"
                             type="email"
                         />
                         <Field 
                             name="password" 
                             component={this.renderField}
                             label="Password"
-                            id="signinPassword"
+                            id="signupPassword"
                             type="password"
                         />
-                        {this.renderError()}
-                        <button action="submit" className="btn btn-primary">Sign in</button>
+                        <Field 
+                            name="confirmPassword" 
+                            component={this.renderField}
+                            label="Confirm Password"
+                            id="signupConfirmPassword"
+                            type="password"
+                        />
+                        <button action="submit" className="btn btn-primary">Sign up!</button>
                     </form>
                 </div>
             </div>
@@ -70,12 +62,29 @@ class Signin extends Component {
     }
 }
 
-function mapStateToProps(state){
-    return { errorMessage: state.auth.error }
+function validate(values){
+    const errors = {};
+
+    if(!values.email) {
+        errors.email = "Enter a email!";
+    }
+
+    if(!values.password) {
+        errors.password = "Enter some password!";
+    }
+
+    if(!values.confirmPassword) {
+        errors.confirmPassword = "Enter password to confirm!";
+    }
+
+    if(values.confirmPassword !== values.password) {
+        errors.confirmPassword = "Passwords do not match";
+    }
+
+    return errors;
 }
 
 export default reduxForm({
-    form: 'signin'
-})(
-    connect(mapStateToProps, actions)(Signin)
-);
+    validate,
+    form: 'signup'
+})(Signup);
